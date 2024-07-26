@@ -1,44 +1,44 @@
-local UserInputService = game:GetService("UserInputService")
+local uis = game:GetService("UserInputService")
 
-local function spinCharacter(character, spinSpeed)
-    local rootPart = character:FindFirstChild("HumanoidRootPart")
-    if not rootPart then
-        warn("HumanoidRootPart is not a thing")
+local function spincharacter(char, speed)
+    local root = char:FindFirstChild("HumanoidRootPart")
+    if not root then
+        warn("Root part is not a tinhg")
         return
     end
 
-    for _, child in pairs(rootPart:GetChildren()) do
+    for _, child in pairs(root:GetChildren()) do
         if child:IsA("BodyAngularVelocity") then
             child:Destroy()
         end
     end
 
     local spin = Instance.new("BodyAngularVelocity")
-    spin.Name = "SpinPart"
-    spin.Parent = rootPart
+    spin.Name = "spinpart"
+    spin.Parent = root
     spin.MaxTorque = Vector3.new(0, math.huge, 0)
-    spin.AngularVelocity = Vector3.new(0, spinSpeed, 0)
+    spin.AngularVelocity = Vector3.new(0, speed, 0)
 end
 
 local spinbool = false
-local spinspeed = 50
+local spinSpeed = 50
 local character = nil
 
-local function Spincheck()
+local function Spinloop()
     while true do
         if character and spinbool then
-            local rootPart = character:FindFirstChild("HumanoidRootPart")
-            if rootPart then
-                local hasBodyAngularVelocity = false
-                for _, child in pairs(rootPart:GetChildren()) do
+            local root = character:FindFirstChild("HumanoidRootPart")
+            if root then
+                local hasspin = false
+                for _, child in pairs(root:GetChildren()) do
                     if child:IsA("BodyAngularVelocity") then
-                        hasBodyAngularVelocity = true
+                        hasspin = true
                         break
                     end
                 end
 
-                if not hasBodyAngularVelocity then
-                    spinCharacter(character, spinSpeed)
+                if not hasspin then
+                    spincharacter(character, spinSpeed)
                 end
             end
         end
@@ -46,11 +46,9 @@ local function Spincheck()
     end
 end
 
-local function Spincheck(char)
+local function onplayeradded(char)
     character = char
-    spawn(function()
-        Spincheck()
-    end)
+    spawn(Spinloop)
 end
 
 local function onInput(input, gameProcessed)
@@ -66,13 +64,13 @@ local function onInput(input, gameProcessed)
 end
 
 local player = game.Players.LocalPlayer
-player.CharacterAdded:Connect(onCharacterAdded)
+player.CharacterAdded:Connect(onplayeradded)
 
 if player.Character then
-    onCharacterAdded(player.Character)
+    onplayeradded(player.Character)
 end
 
-UserInputService.InputBegan:Connect(onInput)
+uis.InputBegan:Connect(onInput)
 
 print([[
 CS Spinbot loaded successfully
@@ -81,17 +79,17 @@ Press G to enable spinbot
 Press H to disable spinbot
 Press J to load AirHub V1 by Exunys
 
-The esp/aimbot will not work with some games that have weird custom rig's.
+The esp/aimbot will not work with some games that have weird custom rigs.
 
 The spinbot enables on reset, and goes for disabling it too.
 
-Also this will be your movement wonky when enabled.
+Also this will make your movement wonky when enabled.
 ]])
 
-local notifSound = Instance.new("Sound",workspace)
+local notifSound = Instance.new("Sound", workspace)
 notifSound.PlaybackSpeed = 1.5
 notifSound.Volume = 0.15
 notifSound.SoundId = "rbxassetid://170765130"
 notifSound.PlayOnRemove = true
 notifSound:Destroy()
-game.StarterGui:SetCore("SendNotification", {Title = "CS Spinbot", Text = "CS Spinbot loaded! Look at console for control's.", Icon = "rbxassetid://505845268", Duration = 20, Button1 = "Okay"})
+game.StarterGui:SetCore("SendNotification", {Title = "CS Spinbot", Text = "CS Spinbot loaded! Check the console for controls.", Icon = "rbxassetid://505845268", Duration = 20, Button1 = "Okay"})
