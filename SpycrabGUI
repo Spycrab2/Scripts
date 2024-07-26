@@ -1,0 +1,210 @@
+local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
+local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
+
+local Window = Fluent:CreateWindow({
+    Title = "Spycrab's Wacky Hub",
+    SubTitle = "By @Spycrab.gg",
+    TabWidth = 160,
+    Size = UDim2.fromOffset(580, 460),
+    Acrylic = true,
+    Theme = "Darker",
+    MinimizeKey = Enum.KeyCode.LeftControl
+})
+
+local Tabs = {
+    Main = Window:AddTab({ Title = "Spinbot And FPS Stuff", Icon = "18661759461" }),
+    PlayerTab = Window:AddTab({ Title = "Player", Icon = "18661760426" }),
+    Misc = Window:AddTab({ Title = "Misc", Icon = "more-horizontal" }),
+    Settings = Window:AddTab({ Title = "Settings", Icon = "settings" }),
+}
+
+local Options = Fluent.Options
+
+local spinbool = false
+local spinSpeed = 50
+local walkSpeed = 16
+local jumpPower = 50
+local character = nil
+
+-- Function to spin character
+local function spincharacter(char, speed)
+    local root = char:FindFirstChild("HumanoidRootPart")
+    if not root then
+        warn("Root part is not a thing")
+        return
+    end
+
+    for _, child in pairs(root:GetChildren()) do
+        if child:IsA("BodyAngularVelocity") then
+            child:Destroy()
+        end
+    end
+
+    local spin = Instance.new("BodyAngularVelocity")
+    spin.Name = "spinpart"
+    spin.Parent = root
+    spin.MaxTorque = Vector3.new(0, math.huge, 0)
+    spin.AngularVelocity = Vector3.new(0, speed, 0)
+end
+
+-- Spinloop function
+local function Spinloop()
+    while true do
+        if character and spinbool then
+            local root = character:FindFirstChild("HumanoidRootPart")
+            if root then
+                local spin = root:FindFirstChild("spinpart")
+                if not spin then
+                    spincharacter(character, spinSpeed)
+                else
+                    spin.AngularVelocity = Vector3.new(0, spinSpeed, 0)
+                end
+            end
+        end
+        wait(0.1)
+    end
+end
+
+local function onplayeradded(char)
+    character = char
+    spawn(Spinloop)
+end
+
+-- Update player walk speed
+local function updateWalkSpeed(speed)
+    local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+    if humanoid then
+        humanoid.WalkSpeed = speed
+    end
+end
+
+-- Update player jump power
+local function updateJumpPower(power)
+    local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+    if humanoid then
+        humanoid.JumpPower = power
+    end
+end
+
+-- UI elements for Main Tab
+Tabs.Main:AddButton({
+    Title = "Spawn AirHub",
+    Description = "ESP and Aimbot.",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Exunys/AirHub/main/AirHub.lua"))()
+    end
+})
+
+local Toggle = Tabs.Main:AddToggle("SpinToggle", { Title = "Spinbot", Default = false })
+Toggle:OnChanged(function()
+    spinbool = Options.SpinToggle.Value
+    if not spinbool and character then
+        local root = character:FindFirstChild("HumanoidRootPart")
+        if root then
+            for _, child in pairs(root:GetChildren()) do
+                if child:IsA("BodyAngularVelocity") then
+                    child:Destroy()
+                end
+            end
+        end
+    end
+end)
+
+local SliderSpeed = Tabs.Main:AddSlider("SpinSpeed", {
+    Title = "Spinbot Speed",
+    Description = "Adjust the spin speed",
+    Default = 50,
+    Min = 0,
+    Max = 100,
+    Rounding = 1,
+    Callback = function(Value)
+        spinSpeed = Value
+    end
+})
+SliderSpeed:OnChanged(function(Value)
+    spinSpeed = Value
+end)
+
+local SliderWalkSpeed = Tabs.PlayerTab:AddSlider("WalkSpeed", {
+    Title = "Walk Speed",
+    Description = "Adjust the player's walk speed",
+    Default = 16,
+    Min = 0,
+    Max = 100,
+    Rounding = 1,
+    Callback = function(Value)
+        walkSpeed = Value
+        updateWalkSpeed(walkSpeed)
+    end
+})
+SliderWalkSpeed:OnChanged(function(Value)
+    walkSpeed = Value
+    updateWalkSpeed(walkSpeed)
+end)
+
+-- UI elements for Player Tab
+local SliderJumpPower = Tabs.PlayerTab:AddSlider("JumpPower", {
+    Title = "Jump Power",
+    Description = "Adjust the player's jump power",
+    Default = 50,
+    Min = 0,
+    Max = 100,
+    Rounding = 1,
+    Callback = function(Value)
+        jumpPower = Value
+        updateJumpPower(jumpPower)
+    end
+})
+SliderJumpPower:OnChanged(function(Value)
+    jumpPower = Value
+    updateJumpPower(jumpPower)
+end)
+
+-- UI elements for Misc Tab
+Tabs.Misc:AddButton({
+    Title = "Inf Yield",
+    Description = "Load Infinite Yield.",
+    Callback = function()
+        loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))()
+    end
+})
+
+Tabs.Misc:AddButton({
+    Title = "Backflip",
+    Description = "Perform a backflip.",
+    Callback = function()
+        loadstring(game:HttpGet('https://pastebin.com/raw/7wDcPtLk'))()
+    end
+})
+
+-- Player added event
+local player = game.Players.LocalPlayer
+player.CharacterAdded:Connect(onplayeradded)
+
+if player.Character then
+    onplayeradded(player.Character)
+end
+
+-- Addons:
+SaveManager:SetLibrary(Fluent)
+InterfaceManager:SetLibrary(Fluent)
+
+SaveManager:IgnoreThemeSettings()
+SaveManager:SetIgnoreIndexes({})
+
+InterfaceManager:SetFolder("FluentScriptHub")
+SaveManager:SetFolder("FluentScriptHub/Spycrabshub")
+
+InterfaceManager:BuildInterfaceSection(Tabs.Settings)
+SaveManager:BuildConfigSection(Tabs.Settings)
+
+Window:SelectTab(1)
+
+Fluent:Notify({
+    Title = "Spycrab's Wacky Hub",
+    Content = "The GUI has been loaded.",
+    Duration = 8
+})
+
+SaveManager:LoadAutoloadConfig()
