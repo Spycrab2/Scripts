@@ -238,6 +238,43 @@ Tabs.Misc:AddButton({
     end
 })
 
+local BhoppinToggle = Tabs.Main:AddToggle("Bhop", {Title = "Bhoppin", Default = false })
+
+local jumpEnabled = false
+local jumpCoroutine
+
+local function bhop()
+    while jumpEnabled do
+        local player = game.Players.LocalPlayer
+        if player and player.Character and player.Character:FindFirstChild("Head") and player.Character:FindFirstChild("Humanoid") then
+            local humanoid = player.Character.Humanoid
+            if humanoid.Health > 0 and humanoid:GetState() ~= Enum.HumanoidStateType.Freefall and humanoid:GetState() ~= Enum.HumanoidStateType.Jumping then
+                humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+                wait(0.3) -- Ensure this interval is consistent with the default cooldown
+            else
+                wait(0.1) -- Short wait before rechecking if the player is in a valid state to jump
+            end
+        else
+            wait(0.1) -- Short wait before rechecking if the player has a Head
+        end
+    end
+end
+
+BhoppinToggle:OnChanged(function()
+    if Options.Bhop.Value then
+        jumpEnabled = true
+        if not jumpCoroutine or coroutine.status(jumpCoroutine) == "dead" then
+            jumpCoroutine = coroutine.create(bhop)
+            coroutine.resume(jumpCoroutine)
+        end
+    else
+        jumpEnabled = false
+    end
+end)
+
+Options.Bhop = BhoppinToggle
+Options.Bhop:SetValue(false)
+
 -- Player added event
 local player = game.Players.LocalPlayer
 player.CharacterAdded:Connect(onplayeradded)
