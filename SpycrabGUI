@@ -79,6 +79,52 @@ local function updateWalkSpeed(speed)
     end
 end
 
+local function deleteAllExceptFloors()
+    local mapLmao = game.Workspace:FindFirstChild("map lmao")
+    
+    if mapLmao then
+        local layout = mapLmao:FindFirstChild("Layout")
+        local floors = layout and layout:FindFirstChild("Floors")
+
+        for _, child in pairs(mapLmao:GetChildren()) do
+            if child ~= layout then
+                child.Parent = game.ReplicatedStorage:FindFirstChild("DeletedItems") or Instance.new("Folder", game.ReplicatedStorage)
+                child.Parent.Name = "DeletedItems"
+            end
+        end
+
+        if layout then
+            for _, child in pairs(layout:GetChildren()) do
+                if child ~= floors then
+                    child.Parent = game.ReplicatedStorage:FindFirstChild("DeletedItems") or Instance.new("Folder", game.ReplicatedStorage)
+                    child.Parent.Name = "DeletedItems"
+                end
+            end
+        end
+    end
+end
+
+local function restoreAllExceptFloors()
+    local deletedItems = game.ReplicatedStorage:FindFirstChild("DeletedItems")
+    local mapLmao = game.Workspace:FindFirstChild("map lmao") or Instance.new("Folder", game.Workspace)
+    mapLmao.Name = "map lmao"
+    
+    if deletedItems then
+        for _, child in pairs(deletedItems:GetChildren()) do
+            if child:IsA("Folder") and child.Name == "Layout" then
+                local layout = mapLmao:FindFirstChild("Layout") or Instance.new("Folder", mapLmao)
+                layout.Name = "Layout"
+                for _, grandchild in pairs(child:GetChildren()) do
+                    grandchild.Parent = layout
+                end
+            else
+                child.Parent = mapLmao
+            end
+        end
+        deletedItems:Destroy()
+    end
+end
+
 -- Update player jump power
 local function updateJumpPower(power)
     local humanoid = character and character:FindFirstChildOfClass("Humanoid")
@@ -95,6 +141,20 @@ Tabs.Main:AddButton({
         loadstring(game:HttpGet("https://raw.githubusercontent.com/Exunys/AirHub/main/AirHub.lua"))()
     end
 })
+
+local RemoveWallsToggle = Tabs.Main:AddToggle("RemoveWalls", {Title = "Remove Walls", Default = false })
+
+RemoveWallsToggle:OnChanged(function()
+    if Options.RemoveWalls.Value then
+        deleteAllExceptFloors()
+    else
+        restoreAllExceptFloors()
+    end
+end)
+
+Options.RemoveWalls = RemoveWallsToggle
+Options.RemoveWalls:SetValue(false)
+
 
 local Toggle = Tabs.Main:AddToggle("SpinToggle", { Title = "Spinbot", Default = false })
 Toggle:OnChanged(function()
