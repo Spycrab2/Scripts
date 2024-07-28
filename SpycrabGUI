@@ -142,7 +142,7 @@ Tabs.Main:AddButton({
     end
 })
 
-local RemoveWallsToggle = Tabs.Main:AddToggle("RemoveWalls", {Title = "Remove Walls", Default = false })
+local RemoveWallsToggle = Tabs.Main:AddToggle("RemoveWalls", {Title = "Remove Walls (only works in No-Scope Arcade 2021.)", Default = false })
 
 RemoveWallsToggle:OnChanged(function()
     if Options.RemoveWalls.Value then
