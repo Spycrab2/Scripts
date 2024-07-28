@@ -238,7 +238,15 @@ Tabs.Misc:AddButton({
     end
 })
 
-local BhoppinToggle = Tabs.Main:AddToggle("Bhop", {Title = "Bhoppin", Default = false })
+Tabs.Misc:AddButton({
+    Title = "Wall on wall's (Press Z)",
+    Description = "Lets you walk on wall's.",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/5T7KsEWy", true))()
+    end
+})
+
+local BhoppinToggle = Tabs.PlayerTab:AddToggle("Bhop", {Title = "Bhoppin", Default = false })
 
 local jumpEnabled = false
 local jumpCoroutine
